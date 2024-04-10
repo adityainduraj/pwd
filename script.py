@@ -42,6 +42,7 @@ def decrypt_password(encrypted_password, key):
     decrypted_password = cipher_suite.decrypt(encrypted_password).decode()
     return decrypted_password
 
+
 # Function to generate a secure password
 def generate_password():
     length_entry = password_length_entry.get()
@@ -73,23 +74,49 @@ def add_password():
 
 # Function to retrieve passwords based on website and username
 def search_password():
-    website = website_entry.get()
-    username = username_entry.get()
+    import tkinter.ttk as ttk  # Import ttk module
 
-    conn = sqlite3.connect('password_manager.db')
-    c = conn.cursor()
-    c.execute("SELECT password FROM passwords WHERE website=? AND username=?", (website, username))
-    result = c.fetchone()
-    conn.close()
+    # Create a new window for search results
+    search_window = tk.Toplevel(root)
+    search_window.title("Search Results")
 
-    if result:
-        key = load_key()
-        decrypted_password = decrypt_password(result[0], key)
-        password_entry.delete(0, tk.END)
-        password_entry.insert(0, decrypted_password)
-        copy_button.grid(row=2, column=2, padx=5, pady=5, sticky="we")
-    else:
-        messagebox.showerror("Error", "Password not found for this website and username.")
+    # Create labels and entry fields for website and username
+    website_label = tk.Label(search_window, text="Website:")
+    website_label.grid(row=0, column=0, padx=10, pady=5, sticky="e")
+    website_entry = tk.Entry(search_window)
+    website_entry.grid(row=0, column=1, padx=10, pady=5)
+
+    username_label = tk.Label(search_window, text="Username:")
+    username_label.grid(row=1, column=0, padx=10, pady=5, sticky="e")
+    username_entry = tk.Entry(search_window)
+    username_entry.grid(row=1, column=1, padx=10, pady=5)
+
+    # Function to display search results
+    def display_results():
+        website = website_entry.get()
+        username = username_entry.get()
+
+        conn = sqlite3.connect('password_manager.db')
+        c = conn.cursor()
+        c.execute("SELECT website, username, password FROM passwords WHERE website=? AND username=?", (website, username))
+        results = c.fetchall()
+        conn.close()
+
+        # Create a table to display search results
+        table = ttk.Treeview(search_window, columns=("Website Name", "Username", "Password"), show="headings")
+        table.heading("Website Name", text="Website Name")
+        table.heading("Username", text="Username")
+        table.heading("Password", text="Password")
+
+        for result in results:
+            decrypted_password = decrypt_password(result[2], load_key())
+            table.insert("", "end", values=(result[0], result[1], decrypted_password))
+
+        table.grid(row=2, column=0, columnspan=2, padx=10, pady=5)
+
+    # Create search button
+    search_button = tk.Button(search_window, text="Search", command=display_results)
+    search_button.grid(row=2, column=1, padx=10, pady=5)
 
 # Function to copy password to clipboard
 def copy_password():
