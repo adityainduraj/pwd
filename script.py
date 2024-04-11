@@ -103,8 +103,10 @@ def search_password():
             c.execute("SELECT website, username, password FROM passwords WHERE website LIKE ? AND username LIKE ?", ('%' + website + '%', '%' + username + '%'))
         elif website:
             c.execute("SELECT website, username, password FROM passwords WHERE website LIKE ?", ('%' + website + '%',))
+        elif username:
+            c.execute("SELECT website, username, password FROM passwords WHERE username LIKE ?", ('%' + username + '%',))
         else:
-            messagebox.showerror("Error", "Please enter a website name.")
+            messagebox.showerror("Error", "Please enter a website name or username.")
 
         results = c.fetchall()
         conn.close()
