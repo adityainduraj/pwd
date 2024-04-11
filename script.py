@@ -63,11 +63,10 @@ def add_password():
     password = password_entry.get()
     key = load_key()
     encrypted_password = encrypt_password(password, key)
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     conn = sqlite3.connect('password_manager.db')
     c = conn.cursor()
-    c.execute("INSERT INTO passwords VALUES (?, ?, ?, ?)", (website, username, encrypted_password, timestamp))
+    c.execute("INSERT INTO passwords VALUES (?, ?, ?)", (website, username, encrypted_password))
     conn.commit()
     conn.close()
 
