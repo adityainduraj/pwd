@@ -63,10 +63,11 @@ def add_password():
     password = password_entry.get()
     key = load_key()
     encrypted_password = encrypt_password(password, key)
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     conn = sqlite3.connect('password_manager.db')
     c = conn.cursor()
-    c.execute("INSERT INTO passwords VALUES (?, ?, ?)", (website, username, encrypted_password))
+    c.execute("INSERT INTO passwords VALUES (?, ?, ?, ?)", (website, username, encrypted_password, timestamp))
     conn.commit()
     conn.close()
 
@@ -132,6 +133,29 @@ def search_password():
 
         # Bind double click event to copy password
         table.bind("<Double-1>", copy_password)
+
+        # Function to sort results by timestamp, from newest to oldest
+        def sort_newest_to_oldest():
+            table.delete(*table.get_children())
+            sorted_results = sorted(results, key=lambda x: x[3], reverse=True)
+            for result in sorted_results:
+                decrypted_password = decrypt_password(result[2], load_key())
+                table.insert("", "end", values=(result[0], result[1], decrypted_password))
+
+        # Function to sort results by timestamp, from oldest to newest
+        def sort_oldest_to_newest():
+            table.delete(*table.get_children())
+            sorted_results = sorted(results, key=lambda x: x[3])
+            for result in sorted_results:
+                decrypted_password = decrypt_password(result[2], load_key())
+                table.insert("", "end", values=(result[0], result[1], decrypted_password))
+
+        # Create buttons for sorting results
+        sort_newest_button = tk.Button(search_window, text="Sort Newest to Oldest", command=sort_newest_to_oldest)
+        sort_newest_button.grid(row=3, column=0, padx=10, pady=5)
+
+        sort_oldest_button = tk.Button(search_window, text="Sort Oldest to Newest", command=sort_oldest_to_newest)
+        sort_oldest_button.grid(row=3, column=1, padx=10, pady=5)
 
     # Create search button
     search_button = tk.Button(search_window, text="Search", command=display_results)
