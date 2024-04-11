@@ -98,7 +98,14 @@ def search_password():
 
         conn = sqlite3.connect('password_manager.db')
         c = conn.cursor()
-        c.execute("SELECT website, username, password FROM passwords WHERE website=? AND username=?", (website, username))
+
+        if website and username:
+            c.execute("SELECT website, username, password FROM passwords WHERE website=? AND username=?", (website, username))
+        elif website:
+            c.execute("SELECT website, username, password FROM passwords WHERE website=?", (website,))
+        else:
+            messagebox.showerror("Error", "Please enter a website name.")
+
         results = c.fetchall()
         conn.close()
 
@@ -112,7 +119,17 @@ def search_password():
             decrypted_password = decrypt_password(result[2], load_key())
             table.insert("", "end", values=(result[0], result[1], decrypted_password))
 
-        table.grid(row=2, column=0, columnspan=2, padx=10, pady=5)
+        table.grid(row=2, column=0, columnspan=3, padx=10, pady=5)
+
+        # Function to copy password to clipboard
+        def copy_password(event):
+            selected_item = table.focus()
+            password = table.item(selected_item)["values"][2]
+            pyperclip.copy(password)
+            messagebox.showinfo("Success", "Password copied to clipboard.")
+
+        # Bind double click event to copy password
+        table.bind("<Double-1>", copy_password)
 
     # Create search button
     search_button = tk.Button(search_window, text="Search", command=display_results)
