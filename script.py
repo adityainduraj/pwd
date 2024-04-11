@@ -100,9 +100,9 @@ def search_password():
         c = conn.cursor()
 
         if website and username:
-            c.execute("SELECT website, username, password FROM passwords WHERE website=? AND username=?", (website, username))
+            c.execute("SELECT website, username, password FROM passwords WHERE website LIKE ? AND username LIKE ?", ('%' + website + '%', '%' + username + '%'))
         elif website:
-            c.execute("SELECT website, username, password FROM passwords WHERE website=?", (website,))
+            c.execute("SELECT website, username, password FROM passwords WHERE website LIKE ?", ('%' + website + '%',))
         else:
             messagebox.showerror("Error", "Please enter a website name.")
 
@@ -242,3 +242,4 @@ create_table()
 
 # Run the main event loop
 root.mainloop()
+
