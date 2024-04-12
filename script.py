@@ -146,8 +146,10 @@ def copy_password():
 # Function to set or verify master password
 def set_master_password():
     master_password = master_password_entry.get()
-    with open("master_password.txt", "w") as file:
-        file.write(master_password)
+    key = load_key()
+    encrypted_master_password = encrypt_password(master_password, key)
+    with open("master_password.txt", "wb") as file:
+        file.write(encrypted_master_password)
     messagebox.showinfo("Success", "Master Password set successfully.")
     master_password_frame.grid_forget()
     login_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
@@ -155,9 +157,11 @@ def set_master_password():
 # Function to check if master password is correct
 def check_master_password():
     entered_password = master_password_entry.get()
+    key = load_key()
     try:
-        with open("master_password.txt", "r") as file:
-            stored_password = file.read()
+        with open("master_password.txt", "rb") as file:
+            encrypted_stored_password = file.read()
+            stored_password = decrypt_password(encrypted_stored_password, key)
             if entered_password == stored_password:
                 login_frame.grid_forget()
                 main_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
