@@ -6,7 +6,7 @@ import string
 import secrets
 import pyperclip
 import os
-
+# this is a test to verify that git is configured correctly
 # Generate a key for AES encryption
 def generate_key():
     key = Fernet.generate_key()
